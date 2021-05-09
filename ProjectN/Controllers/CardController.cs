@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ProjectN.Models;
 using ProjectN.Parameter;
+using ProjectN.Repository;
 
 namespace ProjectN.Controllers
 {
@@ -13,18 +14,26 @@ namespace ProjectN.Controllers
     public class CardController : ControllerBase
     {
         /// <summary>
-        /// 測試用的資料集合
+        /// 卡片資料操作
         /// </summary>
-        private static List<Card> _cards = new List<Card>();
+        private readonly CardRepository _cardRepository;
+
+        /// <summary>
+        /// 建構式
+        /// </summary>
+        public CardController()
+        {
+            this._cardRepository = new CardRepository();
+        }
 
         /// <summary>
         /// 查詢卡片列表
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public List<Card> GetList()
+        public IEnumerable<Card> GetList()
         {
-            return _cards;
+            return this._cardRepository.GetList();
         }
 
         /// <summary>
@@ -36,7 +45,13 @@ namespace ProjectN.Controllers
         [Route("{id}")]
         public Card Get([FromRoute] int id)
         {
-            return _cards.FirstOrDefault(card => card.Id == id);
+            var result = this._cardRepository.Get(id);
+            if (result is null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            return result;
         }
 
         /// <summary>
@@ -47,16 +62,12 @@ namespace ProjectN.Controllers
         [HttpPost]
         public IActionResult Insert([FromBody] CardParameter parameter)
         {
-            _cards.Add(new Card
+            var result = this._cardRepository.Create(parameter);
+            if (result > 0)
             {
-                Id = _cards.Any() 
-                    ? _cards.Max(card => card.Id) + 1
-                    : 0, // 臨時防呆，如果沒東西就從 0 開始
-                Name = parameter.Name,
-                Description = parameter.Description
-            });
-
-            return Ok();
+                return Ok();
+            }
+            return StatusCode(500);
         }
 
         /// <summary>
@@ -71,16 +82,18 @@ namespace ProjectN.Controllers
             [FromRoute] int id,
             [FromBody] CardParameter parameter)
         {
-            var targetCard = _cards.FirstOrDefault(card => card.Id == id);
+            var targetCard = this._cardRepository.Get(id);
             if (targetCard is null)
             {
                 return NotFound();
             }
 
-            targetCard.Name = parameter.Name;
-            targetCard.Description = parameter.Description;
-
-            return Ok();
+            var isUpdateSuccess = this._cardRepository.Update(id, parameter);
+            if (isUpdateSuccess)
+            {
+                return Ok();
+            }
+            return StatusCode(500);
         }
 
         /// <summary>
@@ -92,7 +105,7 @@ namespace ProjectN.Controllers
         [Route("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            _cards.RemoveAll(card => card.Id == id);
+            this._cardRepository.Delete(id);
             return Ok();
         }
     }
