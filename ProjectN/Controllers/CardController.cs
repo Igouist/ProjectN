@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectN.Models;
 using ProjectN.Parameter;
@@ -31,6 +32,7 @@ namespace ProjectN.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [Produces("application/json")]
         public IEnumerable<Card> GetList()
         {
             return this._cardRepository.GetList();
@@ -39,9 +41,14 @@ namespace ProjectN.Controllers
         /// <summary>
         /// 查詢卡片
         /// </summary>
+        /// <remarks>我是附加說明</remarks>
         /// <param name="id">卡片編號</param>
         /// <returns></returns>
+        /// <response code="200">回傳對應的卡片</response>
+        /// <response code="404">找不到該編號的卡片</response>          
         [HttpGet]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(Card), 200)]
         [Route("{id}")]
         public Card Get([FromRoute] int id)
         {
