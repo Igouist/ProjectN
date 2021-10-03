@@ -1,9 +1,9 @@
-﻿namespace ProjectN.Models
+﻿namespace ProjectN.Service.Dtos.ResultModel
 {
     /// <summary>
     /// 卡片
     /// </summary>
-    public class Card
+    public class CardResultModel
     {
         /// <summary>
         /// 卡片編號

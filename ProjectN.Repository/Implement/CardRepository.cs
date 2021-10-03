@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using Dapper;
-using ProjectN.Models;
-using ProjectN.Parameter;
+using ProjectN.Repository.Dtos.Condition;
+using ProjectN.Repository.Dtos.DataModel;
+using ProjectN.Repository.Interface;
 
-namespace ProjectN.Repository
+namespace ProjectN.Repository.Implement
 {
     /// <summary>
-    /// 卡片資料操作
+    /// 卡片管理
     /// </summary>
-    public class CardRepository
+    /// <seealso cref="ProjectN.Repository.Interface.ICardRepository" />
+    public class CardRepository : ICardRepository
     {
         /// <summary>
         /// 連線字串
@@ -22,21 +24,75 @@ namespace ProjectN.Repository
         /// <summary>
         /// 查詢卡片列表
         /// </summary>
+        /// <param name="info"></param>
         /// <returns></returns>
-        public IEnumerable<Card> GetList()
+        public IEnumerable<CardDataModel> GetList(CardSearchCondition condition)
         {
             var sql = "SELECT * FROM Card";
 
-            using var conn = new SqlConnection(_connectString);
-            var result = conn.Query<Card>(sql);
-            return result;
+            var sqlQuery = new List<string>();
+            var parameter = new DynamicParameters();
+
+            if (condition.MinCost.HasValue)
+            {
+                sqlQuery.Add($" Cost >= @MinCost ");
+                parameter.Add("MinCost", condition.MinCost);
+            }
+
+            if (condition.MaxCost.HasValue)
+            {
+                sqlQuery.Add($" Cost <= @MaxCost ");
+                parameter.Add("MaxCost", condition.MaxCost);
+            }
+
+            if (condition.MinAttack.HasValue)
+            {
+                sqlQuery.Add($" Attack >= @MinAttack ");
+                parameter.Add("MinAttack", condition.MinAttack);
+            }
+
+            if (condition.MaxAttack.HasValue)
+            {
+                sqlQuery.Add($" Attack <= @MaxAttack ");
+                parameter.Add("MaxAttack", condition.MaxAttack);
+            }
+
+            if (condition.MinHealth.HasValue)
+            {
+                sqlQuery.Add($" Health >= @MinHealth ");
+                parameter.Add("MinHealth", condition.MinHealth);
+            }
+
+            if (condition.MaxHealth.HasValue)
+            {
+                sqlQuery.Add($" Health <= @MaxHealth ");
+                parameter.Add("MaxHealth", condition.MaxHealth);
+            }
+
+            if (string.IsNullOrWhiteSpace(condition.Name) is false)
+            {
+                sqlQuery.Add($" Name LIKE @Name ");
+                parameter.Add("Name", $"%{condition.MaxHealth}%");
+            }
+
+            if (sqlQuery.Any())
+            {
+                sql += $" WHERE {string.Join(" AND ", sqlQuery)} ";
+            }
+
+            using (var conn = new SqlConnection(_connectString))
+            {
+                var result = conn.Query<CardDataModel>(sql, parameter);
+                return result;
+            }
         }
 
         /// <summary>
         /// 查詢卡片
         /// </summary>
+        /// <param name="id">卡片編號</param>
         /// <returns></returns>
-        public Card Get(int id)
+        public CardDataModel Get(int id)
         {
             var sql =
             @"
@@ -50,7 +106,7 @@ namespace ProjectN.Repository
 
             using (var conn = new SqlConnection(_connectString))
             {
-                var result = conn.QueryFirstOrDefault<Card>(sql, parameters);
+                var result = conn.QueryFirstOrDefault<CardDataModel>(sql, parameters);
                 return result;
             }
         }
@@ -58,9 +114,9 @@ namespace ProjectN.Repository
         /// <summary>
         /// 新增卡片
         /// </summary>
-        /// <param name="parameter">參數</param>
+        /// <param name="parameter">卡片參數</param>
         /// <returns></returns>
-        public int Create(CardParameter parameter)
+        public bool Insert(CardCondition condition)
         {
             var sql =
             @"
@@ -86,18 +142,18 @@ namespace ProjectN.Repository
 
             using (var conn = new SqlConnection(_connectString))
             {
-                var result = conn.QueryFirstOrDefault<int>(sql, parameter);
-                return result;
+                var result = conn.Execute(sql, condition);
+                return result > 0;
             }
         }
 
         /// <summary>
-        /// 修改卡片
+        /// 更新卡片
         /// </summary>
         /// <param name="id">卡片編號</param>
-        /// <param name="parameter">參數</param>
+        /// <param name="condition"></param>
         /// <returns></returns>
-        public bool Update(int id, CardParameter parameter)
+        public bool Update(int id, CardCondition condition)
         {
             var sql =
             @"
@@ -112,7 +168,9 @@ namespace ProjectN.Repository
                     Id = @id
             ";
 
-            var parameters = new DynamicParameters(parameter);
+            var parameters = new DynamicParameters();
+
+            parameters.AddDynamicParams(condition);
             parameters.Add("Id", id, System.Data.DbType.Int32);
 
             using (var conn = new SqlConnection(_connectString))
@@ -127,7 +185,7 @@ namespace ProjectN.Repository
         /// </summary>
         /// <param name="id">卡片編號</param>
         /// <returns></returns>
-        public void Delete(int id)
+        public bool Delete(int id)
         {
             var sql =
             @"
@@ -141,6 +199,7 @@ namespace ProjectN.Repository
             using (var conn = new SqlConnection(_connectString))
             {
                 var result = conn.Execute(sql, parameters);
+                return result > 0;
             }
         }
     }
