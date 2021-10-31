@@ -27,6 +27,8 @@ namespace ProjectN
             services.AddServices();
             services.AddControllers();
 
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             // API ªA°ÈÂ²¤¶
             services.AddSwaggerGen(c =>
             {

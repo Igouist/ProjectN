@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using AutoMapper;
 using ProjectN.Repository.Dtos.Condition;
 using ProjectN.Repository.Dtos.DataModel;
-using ProjectN.Repository.Implement;
 using ProjectN.Repository.Interface;
 using ProjectN.Service.Dtos.Info;
 using ProjectN.Service.Dtos.ResultModel;
 using ProjectN.Service.Interface;
-using ProjectN.Service.Mappings;
 
 namespace ProjectN.Service.Implement
 {
@@ -25,12 +21,11 @@ namespace ProjectN.Service.Implement
         /// <summary>
         /// 建構式
         /// </summary>
-        public CardService(ICardRepository cardRepository)
+        public CardService(
+            IMapper mapper,
+            ICardRepository cardRepository)
         {
-            var config = new MapperConfiguration(cfg =>
-                cfg.AddProfile<ServiceMappings>());
-
-            this._mapper = config.CreateMapper();
+            this._mapper = mapper;
             this._cardRepository = cardRepository;
         }
 
@@ -45,7 +40,7 @@ namespace ProjectN.Service.Implement
             var cards = this._cardRepository.GetList(condition);
 
             var result = this._mapper.Map<
-                IEnumerable<CardDataModel>, 
+                IEnumerable<CardDataModel>,
                 IEnumerable<CardResultModel>>(cards);
 
             return result;

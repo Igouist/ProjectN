@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using ProjectN.Mappings;
 using ProjectN.Models;
 using ProjectN.Parameter;
-using ProjectN.Repository;
 using ProjectN.Service.Dtos.Info;
 using ProjectN.Service.Dtos.ResultModel;
-using ProjectN.Service.Implement;
 using ProjectN.Service.Interface;
 
 namespace ProjectN.Controllers
@@ -26,12 +23,11 @@ namespace ProjectN.Controllers
         /// <summary>
         /// 建構式
         /// </summary>
-        public CardController(ICardService cardService)
+        public CardController(
+            IMapper mapper,
+            ICardService cardService)
         {
-            var config = new MapperConfiguration(cfg =>
-                cfg.AddProfile<ControllerMappings>());
-
-            this._mapper = config.CreateMapper();
+            this._mapper = mapper;
             this._cardService = cardService;
         }
 
@@ -45,7 +41,7 @@ namespace ProjectN.Controllers
             [FromQuery] CardSearchParameter parameter)
         {
             var info = this._mapper.Map<
-                CardSearchParameter, 
+                CardSearchParameter,
                 CardSearchInfo>(parameter);
 
             var cards = this._cardService.GetList(info);
