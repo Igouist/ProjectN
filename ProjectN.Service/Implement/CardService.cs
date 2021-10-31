@@ -25,13 +25,13 @@ namespace ProjectN.Service.Implement
         /// <summary>
         /// 建構式
         /// </summary>
-        public CardService()
+        public CardService(ICardRepository cardRepository)
         {
             var config = new MapperConfiguration(cfg =>
                 cfg.AddProfile<ServiceMappings>());
 
             this._mapper = config.CreateMapper();
-            this._cardRepository = new CardRepository();
+            this._cardRepository = cardRepository;
         }
 
         /// <summary>

@@ -13,6 +13,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using ProjectN.Repository.Implement;
+using ProjectN.Repository.Interface;
+using ProjectN.Service.Implement;
+using ProjectN.Service.Interface;
 
 namespace ProjectN
 {
@@ -28,6 +32,10 @@ namespace ProjectN
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<ICardService, CardService>();
+
+            services.AddScoped<ICardRepository, CardRepository>();
+
             services.AddControllers();
 
             // API ªA°ÈÂ²¤¶
