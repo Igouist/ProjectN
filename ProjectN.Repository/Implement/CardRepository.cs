@@ -19,7 +19,16 @@ namespace ProjectN.Repository.Implement
         /// <summary>
         /// 連線字串
         /// </summary>
-        private readonly string _connectString = @"Server=(LocalDB)\MSSQLLocalDB;Database=Newbie;Trusted_Connection=True;";
+        private readonly string _connectString;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CardRepository"/> class.
+        /// </summary>
+        /// <param name="connectString">The connect string.</param>
+        public CardRepository(string connectString)
+        {
+            this._connectString = connectString;
+        }
 
         /// <summary>
         /// 查詢卡片列表

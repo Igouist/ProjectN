@@ -16,7 +16,11 @@ namespace ProjectN.DIExtensions
         /// <returns></returns>
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            services.AddScoped<ICardRepository, CardRepository>();
+            services.AddScoped<ICardRepository>(sp =>
+            {
+                var connectString = @"Server=(LocalDB)\MSSQLLocalDB;Database=Newbie;Trusted_Connection=True;";
+                return new CardRepository(connectString);
+            });
 
             return services;
         }
