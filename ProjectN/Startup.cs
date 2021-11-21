@@ -7,24 +7,46 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using ProjectN.DIExtensions;
+using ProjectN.Repository.Implement;
+using ProjectN.Repository.Interface;
+using ProjectN.Service.Implement;
+using ProjectN.Service.Interface;
 
 namespace ProjectN
 {
+    /// <summary>
+    /// 啟動點
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// 啟動點
+        /// </summary>
+        /// <param name="configuration"></param>
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.Configuration = configuration;
         }
 
+        /// <summary>
+        /// 組態設定
+        /// </summary>
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// 註冊服務
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRepositories();
-            services.AddServices();
+            services.AddScoped<ICardRepository>(sp =>
+            {
+                var connectionString = this.Configuration.GetValue<string>("ConnectionString");
+                return new CardRepository(connectionString);
+            });
+
+            services.AddScoped<ICardService, CardService>();
+
             services.AddControllers();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -53,7 +75,11 @@ namespace ProjectN
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// 組態設定
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
