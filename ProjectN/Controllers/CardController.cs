@@ -87,41 +87,14 @@ namespace ProjectN.Controllers
             [FromBody] CardParameter parameter)
         {
             // 一堆檢查
-            if (parameter.Attack < 0)
+            var validateMessage = this.ValidateInsertCardParameter(parameter);
+            if (string.IsNullOrWhiteSpace(validateMessage) is false)
             {
-                return BadRequest("卡片的攻擊力不可為負數");
-            }
-
-            if (parameter.Health < 0)
-            {
-                return BadRequest("卡片的生命值不可為負數");
-            }
-
-            if (parameter.Cost < 0)
-            {
-                return BadRequest("卡片的使用成本不可為負數");
-            }
-
-            if (parameter.Description != null &&
-                parameter.Description.Length > 30)
-            {
-                return BadRequest("卡片的敘述說明必須少於三十字");
-            }
-
-            if (string.IsNullOrWhiteSpace(parameter.Name))
-            {
-                return BadRequest("卡片的名稱不可為空白");
-            }
-
-            if (parameter.Name.Length > 15)
-            {
-                return BadRequest("卡片的名稱必須少於十五字");
+                return BadRequest(validateMessage);
             }
 
             // 用 AutoMapper 轉換 Model
-            var info = this._mapper.Map<
-                CardParameter,
-                CardInfo>(parameter);
+            var info = this._mapper.Map<CardParameter,CardInfo>(parameter);
 
             // 呼叫 Service 層寫入資料
             var isInsertSuccess = this._cardService.Insert(info);
@@ -174,6 +147,46 @@ namespace ProjectN.Controllers
         {
             this._cardService.Delete(id);
             return Ok();
+        }
+
+        /// <summary>
+        /// 驗證新增卡片參數
+        /// </summary>
+        /// <returns></returns>
+        private string ValidateInsertCardParameter(CardParameter parameter)
+        {
+            if (parameter.Attack < 0)
+            {
+                return "卡片的攻擊力不可為負數";
+            }
+
+            if (parameter.Health < 0)
+            {
+                return "卡片的生命值不可為負數";
+            }
+
+            if (parameter.Cost < 0)
+            {
+                return "卡片的使用成本不可為負數";
+            }
+
+            if (parameter.Description != null &&
+                parameter.Description.Length > 30)
+            {
+                return "卡片的敘述說明必須少於三十字";
+            }
+
+            if (string.IsNullOrWhiteSpace(parameter.Name))
+            {
+                return "卡片的名稱不可為空白";
+            }
+
+            if (parameter.Name.Length > 15)
+            {
+                return "卡片的名稱必須少於十五字";
+            }
+
+            return string.Empty;
         }
     }
 }
