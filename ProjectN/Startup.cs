@@ -1,16 +1,20 @@
 using System;
 using System.IO;
 using System.Reflection;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using ProjectN.Parameter;
 using ProjectN.Repository.Implement;
 using ProjectN.Repository.Interface;
 using ProjectN.Service.Implement;
 using ProjectN.Service.Interface;
+using ProjectN.Validators;
 
 namespace ProjectN
 {
@@ -48,6 +52,11 @@ namespace ProjectN
             services.AddScoped<ICardService, CardService>();
 
             services.AddControllers();
+
+            //services.AddFluentValidation();
+            //services.AddTransient<IValidator<CardParameter>, CardParameterValidator>();
+
+            services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
