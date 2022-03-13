@@ -14,3 +14,6 @@
 
 ### AutoMapper
 - [AutoMapper —— 類別轉換超省力](https://igouist.github.io/post/2020/07/automapper/)
+
+### FluentValidation
+- [菜雞新訓記 (7): 使用 Fluent Validation 來驗證傳入參數吧](https://igouist.github.io/post/2022/03/newbie-7-fluent-validation/)
